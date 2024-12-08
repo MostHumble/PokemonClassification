@@ -1,0 +1,11 @@
+dependencies:
+  - python
+  - numpy
+  - pandas
+  - pytorch
+  - torchvision
+  - torchaudio
+  - scikit-learn
+  - matplotlib
+  - tqdm
+  - pillow
