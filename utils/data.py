@@ -102,7 +102,7 @@ class PokemonDataModule(Dataset):
 
             means = total_sum / total_count
             stds = torch.sqrt((total_squared_sum / total_count) - (means ** 2))
-        return means, stds
+        return {'mean':means, 'std':stds}
 
     def prepare_data(self,
                      indices_file='indices.pkl',
