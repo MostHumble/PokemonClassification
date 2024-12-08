@@ -146,7 +146,7 @@ if __name__ == "__main__":
     with mlflow.start_run(experiment_id=args.experiment_id,
                           run_name=f"{args.model}_{"finetuning" if not args.feature_extract else "feature_extracting"}\
                             _{'pretrained' if args.use_pretrained else 'not_pretrained'}\
-                            _{args.indices_file}_{random.randint(0, 1000)}"):
+                            _{args.indices_file}_{random.randint(0, 1000)}") as run:
         
         mlflow.log_param("epochs", args.epochs)
         mlflow.log_param("lr", args.lr)
@@ -168,7 +168,6 @@ if __name__ == "__main__":
             use_mlflow=True,
 
         )
-
         # Save the model
         torch.save(model.state_dict(), f"pokemon_{args.model}.pth")
         mlflow.log_artifact(f"pokemon_{args.model}.pth")
