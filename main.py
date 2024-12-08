@@ -143,10 +143,12 @@ if __name__ == "__main__":
     # Device configuration
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    with mlflow.start_run(experiment_id=args.experiment_id,
-                          run_name=f"{args.model}_{"finetuning" if not args.feature_extract else "feature_extracting"}\
-                            _{'pretrained' if args.use_pretrained else 'not_pretrained'}\
-                            _{args.indices_file}_{random.randint(0, 1000)}") as run:
+    with mlflow.start_run(
+            experiment_id=args.experiment_id,
+            run_name=f"{args.model}_{'finetuning' if not args.feature_extract else 'feature_extracting'}"
+                    f"_{'pretrained' if args.use_pretrained else 'not_pretrained'}"
+                    f"_{args.indices_file}_{random.randint(0, 1000)}"
+        ) as run:
         
         mlflow.log_param("epochs", args.epochs)
         mlflow.log_param("lr", args.lr)
