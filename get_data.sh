@@ -4,4 +4,4 @@ curl -L -o ./pokemonclassification.zip https://www.kaggle.com/api/v1/datasets/do
 unzip -d ./pokemonclassification pokemonclassification.zip
 
 # Remove the downloaded zip file (if you don't need it anymore)
-rm ~/Downloads/pokemonclassification.zip
+rm ./pokemonclassification.zip
