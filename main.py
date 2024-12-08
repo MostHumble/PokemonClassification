@@ -4,88 +4,105 @@ from utils.data import PokemonDataModule
 from utils.train import initialize_model, train_and_evaluate
 import torch
 import torch.optim as optim
+import argparse
 
-
-DATA_DIR = "/kaggle/input/pokemonclassification/PokemonData"
-INDICIES_FILE = "/kaggle/input/pokindicies/indices.pkl"
+# The shape of the images that the models expects
 IMG_SHAPE = ((224,224))
 
-pokemon_dataset = PokemonDataModule(DATA_DIR)
-NUM_CLASSES = len(pokemon_dataset.class_names)
+def parser_args():
+    parser = argparse.ArgumentParser(description="Pokemon Classification")
+    parser.add_argument("--data_dir", type=str, default="./pokemonclassification/PokemonData",
+                        help="Path to the data directory")
+    parser.add_argument("--indices_file", type=str, default="indices_60_32.pkl",
+                        help="Path to the indices file")
+    parser.add_argument("--epochs", type=int, default=20, help="Number of epochs")
+    parser.add_argument("--lr", type=float, default=0.001, help="Learning rate")
+    parser.add_argument("--train_batch_size", type=int, default=128, help="train Batch size")
+    parser.add_argument("--test_batch_size", type=int, default=512, help="test Batch size")
+    parser.add_argument("--model", type=str, choices=["resnet", "alexnet", "vgg", "squeezenet", "densenet"], 
+                            default="resnet", help="Model to be used")    
+    parser.add_argument("--feature_extract", type=bool, default=True, help="whether to freeze the backbone or not")
+    parser.add_argument("--use_pretrained", type=bool, default=True, help="whether to use pretrained model or not")
+    return parser.parse_args()
 
-# Get class names
-print(f"Number of classes: {NUM_CLASSES}")
+if __name__ == "__main__":
 
-# You can only the use precomputed means and vars if using the same indices file ('indices.pkl')
-chanel_means = torch.tensor([0.6062, 0.5889, 0.5550])
-chanel_vars = torch.tensor([0.3284, 0.3115, 0.3266])
-stats = {"mean":chanel_means, "std":chanel_vars}
+    args = parser_args()
 
-pokemon_dataset.prepare_data(indices_file=INDICIES_FILE, get_stats=False)
+    pokemon_dataset = PokemonDataModule(args.data_dir)
+    NUM_CLASSES = len(pokemon_dataset.class_names)
 
-print(f"Train dataset size: {len(pokemon_dataset.train_dataset)}")
-print(f"Test dataset size: {len(pokemon_dataset.test_dataset)}")
+    # Get class names
+    print(f"Number of classes: {NUM_CLASSES}")
+
+    # You can only the use precomputed means and vars if using the same indices file ('indices_60_32.pkl')
+    if 'indices_60_32.pkl' in args.indices_file:
+        chanel_means = torch.tensor([0.6062, 0.5889, 0.5550])
+        chanel_vars = torch.tensor([0.3284, 0.3115, 0.3266])
+        stats = {"mean":chanel_means, "std":chanel_vars}
+        _ = pokemon_dataset.prepare_data(indices_file=args.indices_file, get_stats=False)
+    else:
+        stats = pokemon_dataset.prepare_data(indices_file=args.indices_file, get_stats=True)
+
+    print(f"Train dataset size: {len(pokemon_dataset.train_dataset)}")
+    print(f"Test dataset size: {len(pokemon_dataset.test_dataset)}")
 
 
-# Transformations of data for testing
-test_transform=transforms.Compose([
+    # Transformations of data for testing
+    test_transform=transforms.Compose([
+            transforms.Resize(IMG_SHAPE),
+            transforms.ToTensor(),       # Convert PIL images to tensors
+            transforms.Normalize(**stats), # Normalize images using mean and std
+
+    ])
+
+    # Data augmentations for training
+    train_transform = transforms.Compose([
         transforms.Resize(IMG_SHAPE),
-        transforms.ToTensor(),       # Convert PIL images to tensors
-        transforms.Normalize(**stats), # Normalize images using mean and std
+        transforms.RandomRotation(10),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomCrop(IMG_SHAPE, padding=4),
+        transforms.RandomAffine(degrees=10, translate=(0.1, 0.1), scale=(0.9, 1.1)),
+        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
+        transforms.RandomGrayscale(p=0.2),
+        transforms.ToTensor(),
+        transforms.Normalize(**stats)
+    ])
 
-])
+    # get dataloaders
+    trainloader, testloader= pokemon_dataset.get_dataloaders(train_transform=train_transform,
+                                                            test_transform=test_transform,
+                                                            train_batch_size=args.train_batch_size,
+                                                            test_batch_size=args.test_batch_size,
+                                                            )
 
-# Data augmentations for training
-train_transform = transforms.Compose([
-    transforms.Resize(IMG_SHAPE),
-    transforms.RandomRotation(10),
-    transforms.RandomHorizontalFlip(),
-    transforms.RandomCrop(IMG_SHAPE, padding=4),
-    transforms.RandomAffine(degrees=10, translate=(0.1, 0.1), scale=(0.9, 1.1)),
-    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
-    transforms.RandomGrayscale(p=0.2),
-    transforms.ToTensor(),
-    transforms.Normalize(**stats)
-])
+    pokemon_dataset.plot_examples(testloader, stats=stats)
 
-# get dataloaders
-trainloader, testloader= pokemon_dataset.get_dataloaders(train_transform=train_transform,
-                                                         test_transform=test_transform,
-                                                         train_batch_size=128,
-                                                         test_batch_size=512
-                                                        )
+    pokemon_dataset.plot_examples(trainloader, stats=stats)
 
-pokemon_dataset.plot_examples(testloader, stats=stats)
+    # Try with a finetuning a resnet for example
+    model = initialize_model(args.model,
+                            NUM_CLASSES,
+                            feature_extract=args.feature_extract,
+                            use_pretrained=args.use_pretrained)
 
-pokemon_dataset.plot_examples(trainloader, stats=stats)
+    # Print the model we just instantiated
+    print(model)
 
+    # Model, criterion, optimizer
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
+    # Device configuration
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-MODELS = ["resnet", "alexnet", "vgg", "squeezenet", "densenet"]
-
-# Try with a finetuning a resnet for example
-model = initialize_model(MODELS[0],
-                        NUM_CLASSES,
-                        feature_extract=True,
-                        use_pretrained=True)
-
-# Print the model we just instantiated
-print(model)
-
-# Model, criterion, optimizer
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters())
-
-# Device configuration
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-# Train and evaluate
-history = train_and_evaluate(
-    model=model,
-    trainloader=trainloader,
-    testloader=testloader,
-    criterion=criterion,
-    optimizer=optimizer,
-    device=device,
-    epochs=10
-)
+    # Train and evaluate
+    history = train_and_evaluate(
+        model=model,
+        trainloader=trainloader,
+        testloader=testloader,
+        criterion=criterion,
+        optimizer=optimizer,
+        device=device,
+        epochs=args.epochs
+    )
