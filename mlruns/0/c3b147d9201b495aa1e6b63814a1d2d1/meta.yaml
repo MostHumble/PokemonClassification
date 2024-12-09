@@ -1,0 +1,15 @@
+artifact_uri: file:///teamspace/studios/this_studio/PokemonClassification/mlruns/0/c3b147d9201b495aa1e6b63814a1d2d1/artifacts
+end_time: 1733697304804
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: c3b147d9201b495aa1e6b63814a1d2d1
+run_name: vgg_feature_extracting_pretrained_indices_60_32.pkl_558
+run_uuid: c3b147d9201b495aa1e6b63814a1d2d1
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1733695994622
+status: 3
+tags: []
+user_id: zeus
