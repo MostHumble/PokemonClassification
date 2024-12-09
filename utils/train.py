@@ -137,7 +137,7 @@ def set_parameter_requires_grad(model, feature_extracting):
 
 
 def initialize_model(
-    model_name, num_classes, feature_extract=True, use_pretrained=True
+    model_name, num_classes, feature_extract=True, use_pretrained=True, hidden_size=512, image_shape=(224,224,3)
 ):
     # Initialize these variables which will be set in this if statement. Each of these
     #   variables is model specific.
@@ -184,6 +184,37 @@ def initialize_model(
         set_parameter_requires_grad(model_ft, feature_extract)
         num_ftrs = model_ft.classifier.in_features
         model_ft.classifier = nn.Linear(num_ftrs, num_classes)
+
+    elif model_name == "custom_mlp":
+        """ Custom MLP
+        """
+        model_ft = nn.Sequential(
+            nn.Linear(image_shape[0]*image_shape[1]*image_shape[2], hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, hidden_size//2),
+            nn.ReLU(),
+            nn.Linear(hidden_size//2, num_classes),
+        )
+    elif model_name == "custom_cnn":
+        """ Custom CNN
+        """
+        model_ft = nn.Sequential(
+            nn.Conv2d(3, 16, 3, 1, 1),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Conv2d(16, 32, 3, 1, 1),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Conv2d(32, 64, 3, 1, 1),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Flatten(),
+            nn.Linear(64*28*28, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, num_classes),
+        )
 
     else:
         print("Invalid model name, exiting...")
