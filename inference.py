@@ -34,7 +34,6 @@ def main():
         action="store_true",
         help="Whether to run interpretability or not",
     )
-    
     args = parser.parse_args()
 
     if args.interpretability:
