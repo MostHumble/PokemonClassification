@@ -28,7 +28,7 @@ def main():
         "--num_classes", type=int,  help="Number of classes", default=150
     )
     parser.add_argument(
-        "--label", type=str, help="Label to filter the images", default='Clefairy' # Dragonair, Krabby
+        "--label", type=str, help="Label to filter the images", default='Dragonair' # Krabby, Clefairy
         )
     parser.add_argument(
         "--num_correct", type=int, help="Number of correctly classified images", default=5
@@ -39,10 +39,7 @@ def main():
     
     args = parser.parse_args()
 
-    if args.interpretability:
-        assert (
-            args.model_name == "resnet"
-        ), "Only the ResNet is supported model for now"
+    assert (args.model_name == "resnet"), "Only the ResNet is supported model for now"
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
