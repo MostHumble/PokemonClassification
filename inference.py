@@ -37,11 +37,11 @@ def main():
     parser.add_argument(
         "--classify",
         action="store_true",
-        help="Whether to classify the image when saving")
+        help="Whether to classify the image when saving the lime filter")
     
     args = parser.parse_args()
 
-    if args.interpretability:
+    if args.lime_interpretability:
         assert (
             args.model_name == "resnet"
         ), "Interpretability is only supported for ResNet model for now"
