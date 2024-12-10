@@ -60,7 +60,7 @@ def main():
     print(f"Predicted class: {CLASS_NAMES[preds.item()]}")
 
     if args.interpretability:
-        lime_interpret_image_inference(args, model)
+        lime_interpret_image_inference(args, model, image, device)
 
 
 if __name__ == "__main__":
