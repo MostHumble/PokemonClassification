@@ -2,3 +2,4 @@
 pokemonclassification 
 *.zip
 trained_models/pokemon_vgg.pth
+*.cpython-310.pyc
