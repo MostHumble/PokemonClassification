@@ -1,7 +1,7 @@
 import torch
 import matplotlib.pyplot as plt
 from torchvision import transforms
-
+from PIL import Image
 
 # Function to find correctly and incorrectly classified images
 def find_images(dataloader, model, device, num_correct, num_incorrect):
@@ -84,15 +84,19 @@ def show_samples(dataloader, model, device, num_correct=3, num_incorrect=3):
 
 
 # Function to preprocess image
-def preprocess_image(image, img_shape):
-    preprocess = transforms.Compose(
-        [
-            transforms.Resize(img_shape),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ]
-    )
+def preprocess_image(image_path, img_shape):
+
+    # Load the image using PIL
+    image = Image.open(image_path)
+
+    # Apply preprocessing transformations
+    preprocess = transforms.Compose([
+        transforms.Resize(img_shape),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
     image = preprocess(image).unsqueeze(0)
+
     return image
 
 
@@ -101,8 +105,7 @@ def predict(model, image):
     model.eval()
     with torch.no_grad():
         outputs = model(image)
-        _, preds = torch.max(outputs, 1)
-    return preds
+    return outputs
 
 
 # Function to get model predictions for LIME
