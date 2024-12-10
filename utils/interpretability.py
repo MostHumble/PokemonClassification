@@ -61,8 +61,7 @@ def lime_interpret_image_inference(args, model, image, device):
     img_boundry1 = mark_boundaries(temp, mask)
 
     img_boundry1 = unnormalize(img_boundry1).cpu().numpy()
-    print(f'image shape: {img_boundry1.shape}')
-
+    
     # make dir for storing the explanations and save it there with the same name as the image
     os.makedirs("./explanations", exist_ok=True)
     plt.imsave(f"./explanations/{os.path.basename(args.image_path)}", img_boundry1)
