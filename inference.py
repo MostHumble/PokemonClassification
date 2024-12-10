@@ -34,6 +34,11 @@ def main():
         action="store_true",
         help="Whether to run interpretability or not",
     )
+    parser.add_argument(
+        "--classify",
+        action="store_true",
+        help="Whether to classify the image when saving")
+    
     args = parser.parse_args()
 
     if args.interpretability:
