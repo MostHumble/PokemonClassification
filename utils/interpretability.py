@@ -1,35 +1,24 @@
-import torch
-import torch.nn as nn
-from torchvision import models, transforms
 from lime import lime_image
 from skimage.segmentation import mark_boundaries
-import numpy as np
 import matplotlib.pyplot as plt
-from PIL import Image
-from inference import preprocess_image, predict
+from inference_utils import predict
+import os
+import torch 
 
-# Initialize the model
-def initialize_model(num_classes, feature_extract, use_pretrained=True):
-    model_ft = models.resnet18(pretrained=use_pretrained)
-    set_parameter_requires_grad(model_ft, feature_extract)
-    num_ftrs = model_ft.fc.in_features
-    model_ft.fc = nn.Linear(num_ftrs, num_classes)
-    return model_ft
-
-# Function to set parameter requires grad
-def set_parameter_requires_grad(model, feature_extracting):
-    if feature_extracting:
-        for param in model.parameters():
-            param.requires_grad = False
+def unnormalize(image):
+    # Unnormalize the image
+    mean = torch.tensor([0.485, 0.456, 0.406], dtype=image.dtype)
+    std = torch.tensor([0.229, 0.224, 0.225], dtype=image.dtype)
+    image = image * torch.tensor(std)
+    image = image + torch.tensor(mean)
+    image = image.permute(1, 2, 0)
+    return image
 
 
-def lime_interpret_image_inference(args, model):
+def lime_interpret_image_inference(args, model, image):
     # Initialize LIME
     explainer = lime_image.LimeImageExplainer()
-
     # Path to the image you want to explain
-    image_path = args.image_path
-    image = preprocess_image(image_path, (224, 224)).squeeze(0).permute(1, 2, 0).numpy()
     # define a partial function to pass to lime that takes the model as the first parameter
     def predict_fn(x):
         return predict(model, x, args.device)
@@ -38,6 +27,11 @@ def lime_interpret_image_inference(args, model):
     # Get the explanation for the top class
     temp, mask = explanation.get_image_and_mask(explanation.top_labels[0], positive_only=True, num_features=10, hide_rest=False)
     img_boundry1 = mark_boundaries(temp / 255.0, mask)
+
+    img_boundry1 = unnormalize(img_boundry1)
+    # make dir for storing the explanations and save it there with the same name as the image
+    os.makedirs("./explanations", exist_ok=True)
+    plt.imsave(f"./explanations/{os.path.basename(args.image_path)}", img_boundry1)
 
     # Display the image with explanations
     plt.imshow(img_boundry1)
