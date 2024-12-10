@@ -30,12 +30,11 @@ def main():
         "--num_classes", type=int,  help="Number of classes", default=150
     )
     parser.add_argument(
-        "--interpretability",
-        type=bool,
-        required=False,
+        "--lime_interpretability",
+        action="store_true",
         help="Whether to run interpretability or not",
-        default=False,
     )
+    
     args = parser.parse_args()
 
     if args.interpretability:
@@ -50,7 +49,7 @@ def main():
     model = model.to(device)
 
     # Load the model weights
-    model.load_state_dict(torch.load(args.model_weights, map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load(args.model_weights, map_location=device))
 
     # Preprocess the image
     image = preprocess_image(args.image_path, (224, 224)).to(device)
@@ -59,7 +58,7 @@ def main():
     preds = torch.max(predict(model, image), 1)[1]
     print(f"Predicted class: {CLASS_NAMES[preds.item()]}")
 
-    if args.interpretability:
+    if args.lime_interpretability:
         lime_interpret_image_inference(args, model, image, device)
 
 
