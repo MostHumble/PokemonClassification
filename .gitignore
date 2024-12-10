@@ -1,3 +1,4 @@
 .vscode
 pokemonclassification 
 *.zip
+trained_models/pokemon_vgg.pth
