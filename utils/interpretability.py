@@ -1,7 +1,7 @@
 from lime import lime_image
 from skimage.segmentation import mark_boundaries
 import matplotlib.pyplot as plt
-from inference_utils import predict
+from utils.inference_utils import predict
 import os
 import torch
 
