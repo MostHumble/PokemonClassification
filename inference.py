@@ -3,6 +3,7 @@ import argparse
 from utils.inference_utils import preprocess_image, predict
 from utils.train_utils import initialize_model
 from utils.interpretability import lime_interpret_image_inference
+from utils.data import CLASS_NAMES
 
 
 def main():
@@ -23,7 +24,7 @@ def main():
         "--image_path",
         type=str,
         help="Path to the image",
-        default="pokemonclassification\PokemonData\Abra\2eb2a528f9a247358452b3c740df69a0.jpg",
+        default="./pokemonclassification/PokemonData/Chansey/57ccf27cba024fac9531baa9f619ec62.jpg",
     )
     parser.add_argument(
         "--num_classes", type=int,  help="Number of classes", default=150
@@ -52,11 +53,11 @@ def main():
     model.load_state_dict(torch.load(args.model_weights, map_location=torch.device('cpu')))
 
     # Preprocess the image
-    image = preprocess_image(args.image_path, (224, 224))
+    image = preprocess_image(args.image_path, (224, 224)).to(device)
 
     # Perform inference
-    preds = predict(model, image, device)
-    print(f"Predicted class: {preds.item()}")
+    preds = torch.max(predict(model, image), 1)[1]
+    print(f"Predicted class: {CLASS_NAMES[preds.item()]}")
 
     if args.interpretability:
         lime_interpret_image_inference(args, model)
