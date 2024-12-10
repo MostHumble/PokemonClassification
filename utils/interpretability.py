@@ -3,7 +3,8 @@ from skimage.segmentation import mark_boundaries
 import matplotlib.pyplot as plt
 from inference_utils import predict
 import os
-import torch 
+import torch
+
 
 def unnormalize(image):
     # Unnormalize the image
@@ -18,14 +19,20 @@ def unnormalize(image):
 def lime_interpret_image_inference(args, model, image):
     # Initialize LIME
     explainer = lime_image.LimeImageExplainer()
+
     # Path to the image you want to explain
     # define a partial function to pass to lime that takes the model as the first parameter
     def predict_fn(x):
         return predict(model, x, args.device)
+
     # Explain the image
-    explanation = explainer.explain_instance(image, predict_fn, top_labels=5, hide_color=0, num_samples=1000)
+    explanation = explainer.explain_instance(
+        image, predict_fn, top_labels=5, hide_color=0, num_samples=1000
+    )
     # Get the explanation for the top class
-    temp, mask = explanation.get_image_and_mask(explanation.top_labels[0], positive_only=True, num_features=10, hide_rest=False)
+    temp, mask = explanation.get_image_and_mask(
+        explanation.top_labels[0], positive_only=True, num_features=10, hide_rest=False
+    )
     img_boundry1 = mark_boundaries(temp / 255.0, mask)
 
     img_boundry1 = unnormalize(img_boundry1)
@@ -36,5 +43,5 @@ def lime_interpret_image_inference(args, model, image):
 
     # Display the image with explanations
     plt.imshow(img_boundry1)
-    plt.title('LIME Explanation')
+    plt.title("LIME Explanation")
     plt.show()

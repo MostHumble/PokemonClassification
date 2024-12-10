@@ -6,6 +6,7 @@ import mlflow
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 from sklearn.ensemble import RandomForestClassifier
 
+
 # Define the training loop
 def train_one_epoch(model, trainloader, criterion, optimizer, device):
     model.train()
@@ -67,16 +68,23 @@ def evaluate(model, testloader, criterion, device):
 
     # Calculate accuracy, precision, recall, and F1-score
     epoch_accuracy = accuracy_score(all_labels, all_predictions, normalize=True) * 100
-    precision = precision_score(all_labels, all_predictions, average='weighted')
-    recall = recall_score(all_labels, all_predictions, average='weighted')
-    f1 = f1_score(all_labels, all_predictions, average='weighted')
+    precision = precision_score(all_labels, all_predictions, average="weighted")
+    recall = recall_score(all_labels, all_predictions, average="weighted")
+    f1 = f1_score(all_labels, all_predictions, average="weighted")
 
     return epoch_loss, epoch_accuracy, precision, recall, f1
 
 
 # Define the pipeline
 def train_and_evaluate(
-    model, trainloader, testloader, criterion, optimizer, device, epochs, use_mlflow=False
+    model,
+    trainloader,
+    testloader,
+    criterion,
+    optimizer,
+    device,
+    epochs,
+    use_mlflow=False,
 ):
     """
     Train and evaluate the model.
@@ -93,7 +101,15 @@ def train_and_evaluate(
     Returns:
         dict: Training and evaluation statistics.
     """
-    history = {"train_loss": [], "train_acc": [], "test_loss": [], "test_acc": [], "precision": [], "recall": [], "f1": []}
+    history = {
+        "train_loss": [],
+        "train_acc": [],
+        "test_loss": [],
+        "test_acc": [],
+        "precision": [],
+        "recall": [],
+        "f1": [],
+    }
 
     model.to(device)
 
@@ -107,7 +123,9 @@ def train_and_evaluate(
         print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_acc:.2f}%")
 
         # Evaluate the model
-        test_loss, test_acc, precision, recall, f1 = evaluate(model, testloader, criterion, device)
+        test_loss, test_acc, precision, recall, f1 = evaluate(
+            model, testloader, criterion, device
+        )
         print(f"Test Loss: {test_loss:.4f}, Test Accuracy: {test_acc:.2f}%")
 
         # Save statistics
@@ -118,7 +136,7 @@ def train_and_evaluate(
         history["precision"].append(precision)
         history["recall"].append(recall)
         history["f1"].append(f1)
-    
+
         if use_mlflow:
             mlflow.log_metric("epoch", epoch)
             mlflow.log_metric("train_loss", train_loss)
@@ -138,7 +156,12 @@ def set_parameter_requires_grad(model, feature_extracting):
 
 
 def initialize_model(
-    model_name, num_classes, feature_extract=True, use_pretrained=True, hidden_size=512, image_shape=(224,224,3)
+    model_name,
+    num_classes,
+    feature_extract=True,
+    use_pretrained=True,
+    hidden_size=512,
+    image_shape=(224, 224, 3),
 ):
     # Initialize these variables which will be set in this if statement. Each of these
     #   variables is model specific.
@@ -190,13 +213,13 @@ def initialize_model(
         """ Custom MLP
         """
         model_ft = nn.Sequential(
-            nn.Linear(image_shape[0]*image_shape[1]*image_shape[2], hidden_size),
+            nn.Linear(image_shape[0] * image_shape[1] * image_shape[2], hidden_size),
             nn.ReLU(),
             nn.Linear(hidden_size, hidden_size),
             nn.ReLU(),
-            nn.Linear(hidden_size, hidden_size//2),
+            nn.Linear(hidden_size, hidden_size // 2),
             nn.ReLU(),
-            nn.Linear(hidden_size//2, num_classes),
+            nn.Linear(hidden_size // 2, num_classes),
         )
     elif model_name == "custom_cnn":
         """ Custom CNN
@@ -212,7 +235,7 @@ def initialize_model(
             nn.ReLU(),
             nn.MaxPool2d(2),
             nn.Flatten(),
-            nn.Linear(64*28*28, hidden_size),
+            nn.Linear(64 * 28 * 28, hidden_size),
             nn.ReLU(),
             nn.Linear(hidden_size, num_classes),
         )
