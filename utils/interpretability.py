@@ -4,38 +4,71 @@ import matplotlib.pyplot as plt
 from utils.inference_utils import predict
 import os
 import torch
+from PIL import Image
+import numpy as np
 
 
 def unnormalize(image):
-    # Unnormalize the image
-    mean = torch.tensor([0.485, 0.456, 0.406], dtype=image.dtype)
-    std = torch.tensor([0.229, 0.224, 0.225], dtype=image.dtype)
-    image = image * torch.tensor(std)
-    image = image + torch.tensor(mean)
-    image = image.permute(1, 2, 0)
+    # Make sure the image is on the correct dtype and device
+    # Convert mean and std to torch tensors with the correct dtype
+    mean = torch.tensor([0.485, 0.456, 0.406], dtype=torch.float32)  # Use torch.float32
+    std = torch.tensor([0.229, 0.224, 0.225], dtype=torch.float32)    # Use torch.float32
+
+    # If the image is a PyTorch tensor, ensure it has the same dtype
+    if isinstance(image, torch.Tensor):
+        image = image * std + mean
+    else:
+        image = torch.tensor(image, dtype=torch.float32) * std + mean  # Convert to torch if necessary
+
     return image
 
 
-def lime_interpret_image_inference(args, model, image):
-    # Initialize LIME
+
+def lime_interpret_image_inference(args, model, image, device):
+    #Remove batch dimension
+    image = image.squeeze(0)  # From [1, 3, 224, 224] to [3, 224, 224]
+    
+    # Rearrange dimensions to (H, W, C)
+    image = image.permute(1, 2, 0)  # From [3, 224, 224] to [224, 224, 3]
+    
+    # Convert to NumPy array
+    image_np = image.cpu().numpy()  # Ensure the tensor is on the CPU
+    
+    # Step 4: Normalize pixel values
+    image_np = image_np.astype(np.float32)
+
+    # Initialize LIME explainer
     explainer = lime_image.LimeImageExplainer()
 
-    # Path to the image you want to explain
-    # define a partial function to pass to lime that takes the model as the first parameter
+    # Define the prediction function
     def predict_fn(x):
-        return predict(model, x, args.device)
+        # Convert (B, H, W, C) to PyTorch tensor (B, C, H, W)
+        x_tensor = torch.tensor(x).permute(0, 3, 1, 2).to(device)
+        preds = model(x_tensor)
+        return preds.detach().cpu().numpy()
 
-    # Explain the image
+    # Run LIME explanation
     explanation = explainer.explain_instance(
-        image, predict_fn, top_labels=5, hide_color=0, num_samples=1000
+        image_np,
+        predict_fn,
+        top_labels=5,
+        hide_color=0,
+        num_samples=5000
     )
-    # Get the explanation for the top class
-    temp, mask = explanation.get_image_and_mask(
-        explanation.top_labels[0], positive_only=True, num_features=10, hide_rest=False
-    )
-    img_boundry1 = mark_boundaries(temp / 255.0, mask)
 
-    img_boundry1 = unnormalize(img_boundry1)
+    # Get the mask for the top predicted class
+    temp, mask = explanation.get_image_and_mask(
+        explanation.top_labels[0],
+        positive_only=True,
+        num_features=10,
+        hide_rest=False
+    )
+
+    img_boundry1 = mark_boundaries(temp, mask)
+
+    img_boundry1 = unnormalize(img_boundry1).cpu().numpy()
+    print(f'image shape: {img_boundry1.shape}')
+
     # make dir for storing the explanations and save it there with the same name as the image
     os.makedirs("./explanations", exist_ok=True)
     plt.imsave(f"./explanations/{os.path.basename(args.image_path)}", img_boundry1)
