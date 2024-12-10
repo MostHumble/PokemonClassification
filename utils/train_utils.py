@@ -4,6 +4,7 @@ from tqdm import tqdm
 import torch
 import mlflow
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
+from sklearn.ensemble import RandomForestClassifier
 
 # Define the training loop
 def train_one_epoch(model, trainloader, criterion, optimizer, device):
@@ -215,6 +216,10 @@ def initialize_model(
             nn.ReLU(),
             nn.Linear(hidden_size, num_classes),
         )
+    elif model_name == "random_forest":
+        """ Random Forest
+        """
+        model_ft = RandomForestClassifier(n_estimators=100, random_state=42)
 
     else:
         print("Invalid model name, exiting...")
