@@ -62,12 +62,29 @@ def lime_interpret_image_inference(args, model, image, device):
 
     img_boundry1 = unnormalize(img_boundry1).cpu().numpy()
     
-    # make dir for storing the explanations and save it there with the same name as the image
-    os.makedirs("./explanations", exist_ok=True)
-    plt.imsave(f"./explanations/{os.path.basename(args.image_path)}", img_boundry1)
-    print(f"Explanation saved at ./explanations/{os.path.basename(args.image_path)}")
+    # If classification mode is enabled, save in the appropriate directory
+    # check if the basename is an jpg image
+    if args.classify:
+        # Extract the class name and correctness from the image path
+        path_parts = args.image_path.split(os.sep)
+        class_name = path_parts[-3]
+        correctness = path_parts[-2] # correct or mistake
 
-    # Display the image with explanations
-    plt.imshow(img_boundry1)
-    plt.title("LIME Explanation")
-    plt.show()
+        # Create the full save path under the explanations directory
+        save_path = os.path.join('explanations', class_name, correctness, os.path.basename(args.image_path))
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+        # Save the explanation
+        plt.imsave(save_path, img_boundry1)
+        print(f"Explanation saved at {save_path}")
+    else:
+        # make dir for storing the explanations and save it there with the same name as the image
+        os.makedirs("./explanations", exist_ok=True)
+        plt.imsave(f"./explanations/{os.path.basename(args.image_path)}", img_boundry1)
+        print(f"Explanation saved at ./explanations/{os.path.basename(args.image_path)}")
+
+        # Display the image with explanations
+        plt.imshow(img_boundry1)
+        plt.title("LIME Explanation")
+        plt.show()
+        
