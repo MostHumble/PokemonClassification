@@ -10,19 +10,6 @@ dependencies:
   - aniso8601=9.0.1=pyhd3eb1b0_0
   - arrow-cpp=16.1.0=hc1eb8f0_0
   - attrs=24.2.0=py310h06a4308_0
-  - aws-c-auth=0.6.19=h5eee18b_0
-  - aws-c-cal=0.5.20=hdbd6064_0
-  - aws-c-common=0.8.5=h5eee18b_0
-  - aws-c-compression=0.2.16=h5eee18b_0
-  - aws-c-event-stream=0.2.15=h6a678d5_0
-  - aws-c-http=0.6.25=h5eee18b_0
-  - aws-c-io=0.13.10=h5eee18b_0
-  - aws-c-mqtt=0.7.13=h5eee18b_0
-  - aws-c-s3=0.1.51=hdbd6064_0
-  - aws-c-sdkutils=0.1.6=h5eee18b_0
-  - aws-checksums=0.1.13=h5eee18b_0
-  - aws-crt-cpp=0.18.16=h6a678d5_0
-  - aws-sdk-cpp=1.10.55=h721c034_0
   - bcrypt=3.2.0=py310h5eee18b_1
   - blas=1.0=openblas
   - blinker=1.6.2=py310h06a4308_0
@@ -186,6 +173,7 @@ dependencies:
       - fonttools==4.55.0
       - fqdn==1.5.1
       - fsspec==2024.10.0
+      - git-filter-repo==2.47.0
       - google-auth==2.36.0
       - google-auth-oauthlib==1.2.1
       - grpcio==1.68.0
@@ -194,6 +182,7 @@ dependencies:
       - httptools==0.6.4
       - httpx==0.27.2
       - idna==3.10
+      - imageio==2.36.1
       - ipykernel==6.26.0
       - ipython==8.17.2
       - ipywidgets==8.1.1
@@ -215,10 +204,12 @@ dependencies:
       - jupyterlab-server==2.27.3
       - jupyterlab-widgets==3.0.13
       - kiwisolver==1.4.7
+      - lazy-loader==0.4
       - lightning==2.4.0
       - lightning-cloud==0.5.70
       - lightning-sdk==0.1.30
       - lightning-utilities==0.11.9
+      - lime==0.2.0.1
       - litdata==0.2.32
       - litserve==0.2.5
       - markdown==3.7
@@ -282,6 +273,7 @@ dependencies:
       - rpds-py==0.21.0
       - rsa==4.9
       - s3transfer==0.10.4
+      - scikit-image==0.24.0
       - scikit-learn==1.3.2
       - scipy==1.11.4
       - send2trash==1.8.3
@@ -295,6 +287,7 @@ dependencies:
       - tensorboard-data-server==0.7.2
       - termcolor==2.5.0
       - terminado==0.18.1
+      - tifffile==2024.9.20
       - tinycss2==1.4.0
       - tomli==2.1.0
       - torch==2.2.1+cu121
