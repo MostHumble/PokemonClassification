@@ -10,26 +10,23 @@ def main():
     parser.add_argument(
         "--model_name",
         type=str,
-        required=True,
         help="Model name (resnet, alexnet, vgg, squeezenet, densenet)",
         default="resnet",
     )
     parser.add_argument(
         "--model_weights",
         type=str,
-        required=True,
         help="Path to the model weights",
-        default="trained_models\pokemon_resnet.pth",
+        default="./trained_models/pokemon_resnet.pth",
     )
     parser.add_argument(
         "--image_path",
         type=str,
-        required=True,
         help="Path to the image",
         default="pokemonclassification\PokemonData\Abra\2eb2a528f9a247358452b3c740df69a0.jpg",
     )
     parser.add_argument(
-        "--num_classes", type=int, required=True, help="Number of classes", default=150
+        "--num_classes", type=int,  help="Number of classes", default=150
     )
     parser.add_argument(
         "--interpretability",
@@ -52,7 +49,7 @@ def main():
     model = model.to(device)
 
     # Load the model weights
-    model.load_state_dict(torch.load(args.model_weights))
+    model.load_state_dict(torch.load(args.model_weights, map_location=torch.device('cpu')))
 
     # Preprocess the image
     image = preprocess_image(args.image_path, (224, 224))
