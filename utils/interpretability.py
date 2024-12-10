@@ -32,6 +32,7 @@ def lime_interpret_image_inference(args, model, image):
     # make dir for storing the explanations and save it there with the same name as the image
     os.makedirs("./explanations", exist_ok=True)
     plt.imsave(f"./explanations/{os.path.basename(args.image_path)}", img_boundry1)
+    print(f"Explanation saved at ./explanations/{os.path.basename(args.image_path)}")
 
     # Display the image with explanations
     plt.imshow(img_boundry1)
