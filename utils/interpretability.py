@@ -25,17 +25,11 @@ def unnormalize(image):
 
 
 def lime_interpret_image_inference(args, model, image, device):
-    #Remove batch dimension
-    image = image.squeeze(0)  # From [1, 3, 224, 224] to [3, 224, 224]
-    
-    # Rearrange dimensions to (H, W, C)
-    image = image.permute(1, 2, 0)  # From [3, 224, 224] to [224, 224, 3]
+    # Remove batch dimension and Rearrange dimensions to (H, W, C)
+    image = image.squeeze(0).permute(1, 2, 0)  # From From [1, 3, 224, 224] to [224, 224, 3]
     
     # Convert to NumPy array
     image_np = image.cpu().numpy()  # Ensure the tensor is on the CPU
-    
-    # Step 4: Normalize pixel values
-    image_np = image_np.astype(np.float32)
 
     # Initialize LIME explainer
     explainer = lime_image.LimeImageExplainer()
