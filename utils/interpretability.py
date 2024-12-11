@@ -25,8 +25,8 @@ def unnormalize(image):
 
 
 def lime_interpret_image_inference(args, model, image, device):
-    # Load the image
-    def prepare_for_plot(x): unnormalize(x).cpu().numpy()
+    # prepare the image
+    def prepare_for_plot(image): return unnormalize(image).cpu().numpy()
     # Remove batch dimension and Rearrange dimensions to (H, W, C)
     image = image.squeeze(0).permute(1, 2, 0)  # From From [1, 3, 224, 224] to [224, 224, 3]
     
@@ -101,7 +101,7 @@ def lime_interpret_image_inference(args, model, image, device):
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
         # Save the explanation
-        plt.savefig(save_path)
+        plt.savefig(save_path, dpi=300)
         print(f"Explanation saved at {save_path}")
     else:
         # make dir for storing the explanations and save it there with the same name as the image
