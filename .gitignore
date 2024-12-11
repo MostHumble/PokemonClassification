@@ -4,3 +4,4 @@ pokemonclassification
 trained_models/pokemon_vgg.pth
 *.cpython-310.pyc
 __pycache__
+utils/__pycache__/data.cpython-310.pyc
