@@ -69,6 +69,7 @@ def lime_interpret_image_inference(args, model, image, device):
         path_parts = args.image_path.split(os.sep)
         class_name = path_parts[-3]
         correctness = path_parts[-2] # correct or mistake
+        assert correctness in ['correct', 'mistake'], "The image path should contain 'correct' or 'mistake'"
 
         # Create the full save path under the explanations directory
         save_path = os.path.join('explanations', class_name, correctness, os.path.basename(args.image_path))
