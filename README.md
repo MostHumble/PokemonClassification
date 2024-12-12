@@ -130,6 +130,10 @@ Example:
 python inference.py --model_name resnet --model_weights path_to_your_model_weights.pth --image_path path_to_your_image.jpg --num_classes 10 --lime_interpretability
 ```
 
+sample:
+
+<img src="./explanations/Dragonair/correct/a972bd91c54e41858b75faa4dd299a5a.jpg" width="60%"/>
+
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
